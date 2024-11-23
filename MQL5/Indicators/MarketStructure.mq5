@@ -34,7 +34,7 @@ double ExtLowPriceBuffer[]; // lower price
 
 // config
 input group "Section :: Main";
-//...
+int InpPeriod = 5; // Period
 
 input group "Section :: Style";
 input int InpArrowShift = 10; // Arrow shift
@@ -49,7 +49,10 @@ input bool InpDebugEnabled = true; // Endble debug (verbose logging)
 //...
 
 // runtime
-ENUM_TREND_TYPE trend = ENUM_TREND_NONE;
+int highIdx;
+int lowIdx;
+int bos;
+//ENUM_TREND_TYPE trend = ENUM_TREND_NONE;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -130,6 +133,12 @@ int OnCalculate(const int rates_total,
                 const long &volume[],
                 const int &spread[])
   {
+   if(prev_calculated == 0)
+     {
+      highIdx = rates_total - 1;
+      lowIdx = rates_total - 1;
+      bos = 0;
+     }
    if(rates_total == prev_calculated)
      {
       return rates_total;
@@ -140,59 +149,54 @@ int OnCalculate(const int rates_total,
    ArraySetAsSeries(low, true);
 
    int limit = rates_total - (prev_calculated == 0 ? 1 : prev_calculated);
-   //limit = 200;
    if(InpDebugEnabled)
      {
       PrintFormat("RatesTotal: %i, PrevCalculated: %i, Limit: %i", rates_total, prev_calculated, limit);
      }
 
-   int highIdx = limit;
-   int lowIdx = limit;
-   int bos = 0;
-
-   int InpPeriod = 5;
-
    Print("High on ", highIdx, " bar at ", time[highIdx]);
    Print("Low on ", lowIdx, " bar at ", time[lowIdx]);
 
-   for(int i = rates_total - 1; i > 0; i--)
+// TODO: Rewrite without series
+
+   for(int i = limit; i > 0; i--)
      {
       if(high[i] > high[highIdx])
         {
-         if(bos == -1 || highIdx - i >= InpPeriod)
+         if(highIdx - i >= InpPeriod)
            {
             lowIdx = highIdx;
             for(int j = highIdx - 1; j >= i; j--)
               {
                if(low[j] < low[lowIdx])
                  {
-                  lowIdx = j;
+                  lowIdx = prev_calculated + j;
                  }
               }
             Print("Calculated Low on ", lowIdx, " bar at ", time[lowIdx], " in range: ", i, "-", highIdx);
            }
 
-         highIdx = i;
+         highIdx = prev_calculated + i;
          bos = 1;
          Print("High on ", i, " bar at ", time[i], " with BOS=", bos);
         }
 
       if(low[i] < low[lowIdx])
         {
-         if(bos == 1 || lowIdx - i >= InpPeriod)
+         if(lowIdx - i >= InpPeriod)
            {
             highIdx = lowIdx;
             for(int j = lowIdx - 1; j >= i; j--)
               {
                if(high[j] > high[highIdx])
                  {
-                  highIdx = j;
+                  highIdx = prev_calculated + j;
                  }
               }
             Print("Calculated High on ", highIdx, " bar at ", time[highIdx], " in range: ", i, "-", lowIdx);
            }
 
-         lowIdx = i;
+         lowIdx = prev_calculated + i;
          bos = -1;
          Print("Low on ", i, " bar at ", time[i], " with BOS=", bos);
         }
