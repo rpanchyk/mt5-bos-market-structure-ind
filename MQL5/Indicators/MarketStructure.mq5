@@ -9,8 +9,8 @@
 #property description "Indicator shows market structure"
 
 #property indicator_chart_window
-#property indicator_plots 2
-#property indicator_buffers 2
+#property indicator_plots 4
+#property indicator_buffers 4
 
 // types
 enum ENUM_ARROW_SIZE
@@ -22,21 +22,26 @@ enum ENUM_ARROW_SIZE
   };
 
 // buffers
-double ExtHighPriceBuffer[]; // higher price
-double ExtLowPriceBuffer[]; // lower price
+double ExtHighPriceBuffer[]; // Higher price
+double ExtLowPriceBuffer[]; // Lower price
+double ExtCalcHighPriceBuffer[]; // Calculated higher price (between lows)
+double ExtCalcLowPriceBuffer[]; // Calculated lower price (between highs)
 
 // config
 input group "Section :: Main";
-int InpPeriod = 5; // Period
+input int InpPeriod = 10; // Period
+input bool InpCalcHighLowEnabled = false; // Separate calculated High/Low
 
 input group "Section :: Style";
 input int InpArrowShift = 10; // Arrow shift
-input ENUM_ARROW_SIZE InpArrowSize = SMALL_ARROW_SIZE; // Arrow size
+input ENUM_ARROW_SIZE InpArrowSize = REGULAR_ARROW_SIZE; // Arrow size
 input color InpHigherHighColor = clrGreen; // Higher high color
 input color InpLowerLowColor = clrRed; // Lower low color
+input color InpCalcHigherHighColor = clrYellowGreen; // Calculated higher high color
+input color InpCalcLowerLowColor = clrLightCoral; // Calculated lower low color
 
 input group "Section :: Dev";
-input bool InpDebugEnabled = false; // Endble debug (verbose logging)
+input bool InpDebugEnabled = true; // Enable debug (verbose logging)
 
 // runtime
 int highIdx = 0;
@@ -57,7 +62,7 @@ int OnInit()
    ArrayInitialize(ExtHighPriceBuffer, EMPTY_VALUE);
    SetIndexBuffer(0, ExtHighPriceBuffer, INDICATOR_DATA);
    PlotIndexSetDouble(0, PLOT_EMPTY_VALUE, EMPTY_VALUE);
-   PlotIndexSetString(0, PLOT_LABEL, "Higher High");
+   PlotIndexSetString(0, PLOT_LABEL, "High");
    PlotIndexSetInteger(0, PLOT_DRAW_TYPE, DRAW_ARROW);
    PlotIndexSetInteger(0, PLOT_ARROW, 159);
    PlotIndexSetInteger(0, PLOT_ARROW_SHIFT, -InpArrowShift);
@@ -67,12 +72,32 @@ int OnInit()
    ArrayInitialize(ExtLowPriceBuffer, EMPTY_VALUE);
    SetIndexBuffer(1, ExtLowPriceBuffer, INDICATOR_DATA);
    PlotIndexSetDouble(1, PLOT_EMPTY_VALUE, EMPTY_VALUE);
-   PlotIndexSetString(1, PLOT_LABEL, "Lower Low");
+   PlotIndexSetString(1, PLOT_LABEL, "Low");
    PlotIndexSetInteger(1, PLOT_DRAW_TYPE, DRAW_ARROW);
    PlotIndexSetInteger(1, PLOT_ARROW, 159);
    PlotIndexSetInteger(1, PLOT_ARROW_SHIFT, InpArrowShift);
    PlotIndexSetInteger(1, PLOT_LINE_WIDTH, InpArrowSize);
    PlotIndexSetInteger(1, PLOT_LINE_COLOR, InpLowerLowColor);
+
+   ArrayInitialize(ExtCalcHighPriceBuffer, EMPTY_VALUE);
+   SetIndexBuffer(2, ExtCalcHighPriceBuffer, INDICATOR_DATA);
+   PlotIndexSetDouble(2, PLOT_EMPTY_VALUE, EMPTY_VALUE);
+   PlotIndexSetString(2, PLOT_LABEL, "Calculated High");
+   PlotIndexSetInteger(2, PLOT_DRAW_TYPE, DRAW_ARROW);
+   PlotIndexSetInteger(2, PLOT_ARROW, 159);
+   PlotIndexSetInteger(2, PLOT_ARROW_SHIFT, -InpArrowShift - InpArrowShift);
+   PlotIndexSetInteger(2, PLOT_LINE_WIDTH, InpArrowSize);
+   PlotIndexSetInteger(2, PLOT_LINE_COLOR, InpCalcHigherHighColor);
+
+   ArrayInitialize(ExtCalcLowPriceBuffer, EMPTY_VALUE);
+   SetIndexBuffer(3, ExtCalcLowPriceBuffer, INDICATOR_DATA);
+   PlotIndexSetDouble(3, PLOT_EMPTY_VALUE, EMPTY_VALUE);
+   PlotIndexSetString(3, PLOT_LABEL, "Calculated Low");
+   PlotIndexSetInteger(3, PLOT_DRAW_TYPE, DRAW_ARROW);
+   PlotIndexSetInteger(3, PLOT_ARROW, 159);
+   PlotIndexSetInteger(3, PLOT_ARROW_SHIFT, InpArrowShift + InpArrowShift);
+   PlotIndexSetInteger(3, PLOT_LINE_WIDTH, InpArrowSize);
+   PlotIndexSetInteger(3, PLOT_LINE_COLOR, InpCalcLowerLowColor);
 
    if(InpDebugEnabled)
      {
@@ -92,10 +117,20 @@ void OnDeinit(const int reason)
      }
 
    ArrayFill(ExtHighPriceBuffer, 0, ArraySize(ExtHighPriceBuffer), EMPTY_VALUE);
+   ArrayResize(ExtHighPriceBuffer, 0);
    ArrayFree(ExtHighPriceBuffer);
 
    ArrayFill(ExtLowPriceBuffer, 0, ArraySize(ExtLowPriceBuffer), EMPTY_VALUE);
+   ArrayResize(ExtLowPriceBuffer, 0);
    ArrayFree(ExtLowPriceBuffer);
+
+   ArrayFill(ExtCalcHighPriceBuffer, 0, ArraySize(ExtCalcHighPriceBuffer), EMPTY_VALUE);
+   ArrayResize(ExtCalcHighPriceBuffer, 0);
+   ArrayFree(ExtCalcHighPriceBuffer);
+
+   ArrayFill(ExtCalcLowPriceBuffer, 0, ArraySize(ExtCalcLowPriceBuffer), EMPTY_VALUE);
+   ArrayResize(ExtCalcLowPriceBuffer, 0);
+   ArrayFree(ExtCalcLowPriceBuffer);
 
    if(InpDebugEnabled)
      {
@@ -158,15 +193,29 @@ void SetHigh(const datetime &time[], const double &high[], const double &low[], 
             lowIdx = j;
            }
         }
-      ExtLowPriceBuffer[lowIdx] = low[lowIdx];
-      if(InpDebugEnabled)
+
+      if(ExtLowPriceBuffer[lowIdx] == EMPTY_VALUE || ExtLowPriceBuffer[lowIdx] <= 0.0)
         {
-         Print("Calculated Low on ", lowIdx, " bar at ", time[lowIdx], " in range: ", highIdx, "-", i);
+         if(InpCalcHighLowEnabled)
+           {
+            ExtCalcLowPriceBuffer[lowIdx] = low[lowIdx];
+           }
+         else
+           {
+            ExtLowPriceBuffer[lowIdx] = low[lowIdx];
+           }
+         if(InpDebugEnabled)
+           {
+            Print("Calculated Low on ", lowIdx, " bar at ", time[lowIdx], " in range: ", highIdx, "-", i);
+           }
         }
      }
    else
      {
-      ExtHighPriceBuffer[highIdx] = EMPTY_VALUE;
+      if(lowIdx < highIdx)
+        {
+         ExtHighPriceBuffer[highIdx] = EMPTY_VALUE;
+        }
      }
 
    highIdx = i;
@@ -192,15 +241,28 @@ void SetLow(const datetime &time[], const double &high[], const double &low[], i
             highIdx = j;
            }
         }
-      ExtHighPriceBuffer[highIdx] = high[highIdx];
-      if(InpDebugEnabled)
+      if(ExtHighPriceBuffer[highIdx] == EMPTY_VALUE || ExtHighPriceBuffer[highIdx] <= 0.0)
         {
-         Print("Calculated High on ", highIdx, " bar at ", time[highIdx], " in range: ", lowIdx, "-", i);
+         if(InpCalcHighLowEnabled)
+           {
+            ExtCalcHighPriceBuffer[highIdx] = high[highIdx];
+           }
+         else
+           {
+            ExtHighPriceBuffer[highIdx] = high[highIdx];
+           }
+         if(InpDebugEnabled)
+           {
+            Print("Calculated High on ", highIdx, " bar at ", time[highIdx], " in range: ", lowIdx, "-", i);
+           }
         }
      }
    else
      {
-      ExtLowPriceBuffer[lowIdx] = EMPTY_VALUE;
+      if(highIdx < lowIdx)
+        {
+         ExtLowPriceBuffer[lowIdx] = EMPTY_VALUE;
+        }
      }
 
    lowIdx = i;
