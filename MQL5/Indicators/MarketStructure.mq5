@@ -41,7 +41,7 @@ input color InpCalcHigherHighColor = clrYellowGreen; // Calculated higher high c
 input color InpCalcLowerLowColor = clrLightCoral; // Calculated lower low color
 
 input group "Section :: Dev";
-input bool InpDebugEnabled = true; // Enable debug (verbose logging)
+input bool InpDebugEnabled = false; // Enable debug (verbose logging)
 
 // runtime
 int highIdx;
