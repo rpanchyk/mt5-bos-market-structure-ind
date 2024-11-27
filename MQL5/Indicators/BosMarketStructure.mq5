@@ -160,13 +160,12 @@ int OnCalculate(const int rates_total,
       return rates_total;
      }
 
-   int limit = rates_total - (prev_calculated == 0 ? 1 : prev_calculated);
    if(InpDebugEnabled)
      {
-      PrintFormat("RatesTotal: %i, PrevCalculated: %i, Limit: %i", rates_total, prev_calculated, limit);
+      PrintFormat("RatesTotal: %i, PrevCalculated: %i", rates_total, prev_calculated);
      }
 
-   for(int i = (prev_calculated == 0 ? 1 : prev_calculated); i < rates_total; i++)
+   for(int i = (prev_calculated == 0 ? 1 : prev_calculated) - 1; i < rates_total; i++)
      {
       if(high[i] > high[highIdx])
         {
