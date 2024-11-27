@@ -1,12 +1,12 @@
 //+------------------------------------------------------------------+
-//|                                              MarketStructure.mq5 |
+//|                                           BosMarketStructure.mq5 |
 //|                                         Copyright 2024, rpanchyk |
 //|                                      https://github.com/rpanchyk |
 //+------------------------------------------------------------------+
 #property copyright   "Copyright 2024, rpanchyk"
 #property link        "https://github.com/rpanchyk"
 #property version     "1.00"
-#property description "Indicator shows market structure"
+#property description "Indicator shows market structure based on break of structure"
 
 #property indicator_chart_window
 #property indicator_plots 4
