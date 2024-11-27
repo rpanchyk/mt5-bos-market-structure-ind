@@ -44,8 +44,8 @@ input group "Section :: Dev";
 input bool InpDebugEnabled = true; // Enable debug (verbose logging)
 
 // runtime
-int highIdx = 0;
-int lowIdx = 0;
+int highIdx;
+int lowIdx;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -98,6 +98,9 @@ int OnInit()
    PlotIndexSetInteger(3, PLOT_ARROW_SHIFT, InpArrowShift + InpArrowShift);
    PlotIndexSetInteger(3, PLOT_LINE_WIDTH, InpArrowSize);
    PlotIndexSetInteger(3, PLOT_LINE_COLOR, InpCalcLowerLowColor);
+
+   highIdx = 0;
+   lowIdx = 0;
 
    if(InpDebugEnabled)
      {
