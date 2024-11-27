@@ -1,11 +1,11 @@
-# Forex Market Structure Indicator for MT5
-Indicator shows market structure in MetaTrader 5.
+# Forex BOS Market Structure Indicator for MT5
+Indicator shows market structure based on break of structure in MetaTrader 5.
 
 ## Installation
 - Open data folder in MetaTrader from menu `File -> Open Data Folder`.
-- Copy [MarketStructure.mq5](MQL5/Indicators/MarketStructure.mq5) file to `<METATRADER_DATA_DIR>\MQL5\Indicators` folder.
+- Copy [BosMarketStructure.mq5](MQL5/Indicators/BosMarketStructure.mq5) file to `<METATRADER_DATA_DIR>\MQL5\Indicators` folder.
 - Update the list of indicators on Navigator panel.
-- Drag `MarketStructure` indicator on the chart.
+- Drag indicator on the chart.
 
 ## Contribution
 Feel free to create an issue or a pull request if any ideas.

@@ -28,7 +28,7 @@ if not exist "%INDICATORS_DIR%" mkdir "%INDICATORS_DIR%"
 @REM Copy files to local dirs
 ::xcopy /s /i /f /v /y "%DATA_DIR%\%INCLUDE_DIR%" "%INCLUDE_DIR%"
 ::copy /y "%DATA_DIR%\%EXPERTS_DIR%\My_EA.mq5" "%EXPERTS_DIR%"
-copy /y "%DATA_DIR%\%INDICATORS_DIR%\MarketStructure.mq5" "%INDICATORS_DIR%"
+copy /y "%DATA_DIR%\%INDICATORS_DIR%\BosMarketStructure.mq5" "%INDICATORS_DIR%"
 
 echo Successfully copied.
 timeout /t 5
