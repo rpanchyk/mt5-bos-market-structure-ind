@@ -162,7 +162,7 @@ int OnCalculate(const int rates_total,
 
    if(InpDebugEnabled)
      {
-      PrintFormat("RatesTotal: %i, PrevCalculated: %i", rates_total, prev_calculated);
+      PrintFormat("RatesTotal: %i, PrevCalculated: %i, HighIndex: %i, LowIndex: %i", rates_total, prev_calculated, highIdx, lowIdx);
      }
 
    for(int i = (prev_calculated == 0 ? 1 : prev_calculated) - 1; i < rates_total; i++)
